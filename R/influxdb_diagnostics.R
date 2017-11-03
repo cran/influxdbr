@@ -1,5 +1,5 @@
 #' @title Show stats
-#' @description This function is calls `influx_query` to receive some stats.
+#' @description This function calls `influx_query` to receive some stats.
 #' @inheritParams influx_query
 #'
 #' @return A tibble.
@@ -31,7 +31,7 @@ show_stats <- function(con) {
 }
 
 #' @title Show diagnostics
-#' @description This function is calls `influx_query` to receive some diagnostics.
+#' @description This function calls `influx_query` to receive some diagnostics.
 #' @inheritParams influx_query
 #' @return A tibble with diagnostics.
 #' @rdname show_diagnostics

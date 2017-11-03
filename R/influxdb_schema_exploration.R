@@ -14,13 +14,13 @@
 #' @param key The key to be queried.
 #' @param where Apply filter on tag key values.
 #' @return A tibble containing query results.
-#' @name influx_schema_exploration_helpers
+#' @name show_databases
 #' @seealso \code{\link[influxdbr]{influx_connection}}
 #' @references \url{https://docs.influxdata.com/influxdb/}
 NULL
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_databases <- function(con) {
   result <- influx_query(con = con,
                          query = "SHOW DATABASES",
@@ -32,7 +32,7 @@ show_databases <- function(con) {
 }
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_measurements <- function(con, db, where = NULL) {
   query <- ifelse(is.null(where),
                   "SHOW MEASUREMENTS",
@@ -51,7 +51,7 @@ show_measurements <- function(con, db, where = NULL) {
 }
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_series <- function(con,
                         db,
                         measurement = NULL,
@@ -72,14 +72,14 @@ show_series <- function(con,
   ) %>%
     purrr::map_df( ~ dplyr::select(., key)) %>%
     .[["key"]] %>%
-    purrr::map_df(.influxdb_line_protocol_to_array) %>%
+    purrr::map_df(line_protocol_to_array) %>%
     tibble::as_tibble()
   
   return(result)
 }
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_tag_keys <- function(con, db, measurement = NULL) {
   query <- ifelse(is.null(measurement),
                   "SHOW TAG KEYS",
@@ -97,12 +97,18 @@ show_tag_keys <- function(con, db, measurement = NULL) {
 }
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_tag_values <- function(con, db, measurement = NULL, key) {
+  
+  # check Option useFancyQuotes
+  quotes <- getOption("useFancyQuotes")
+  on.exit(options("useFancyQuotes" = quotes))
+  options("useFancyQuotes" = FALSE)
+  
   query <- ifelse(is.null(measurement),
                   "SHOW TAG VALUES",
                   paste("SHOW TAG VALUES FROM", measurement)) %>%
-    paste(., "WITH KEY=", key)
+    paste(., " WITH KEY=", base::dQuote(key), sep = "")
   
   result <- influx_query(
     con = con,
@@ -117,7 +123,7 @@ show_tag_values <- function(con, db, measurement = NULL, key) {
 }
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_field_keys <- function(con, db, measurement = NULL) {
   query <- ifelse(is.null(measurement),
                   "SHOW FIELD KEYS",
@@ -136,7 +142,7 @@ show_field_keys <- function(con, db, measurement = NULL) {
 }
 
 #' @export
-#' @rdname influx_schema_exploration_helpers
+#' @rdname show_databases
 show_retention_policies <- function(con, db) {
   result <- influx_query(
     con = con,

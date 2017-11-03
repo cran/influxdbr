@@ -31,9 +31,14 @@ influx_select <- function(con,
                           order_desc = FALSE,
                           return_xts = TRUE, 
                           simplifyList = FALSE) {
+  
+  # check Option useFancyQuotes
+  quotes <- getOption("useFancyQuotes")
+  on.exit(options("useFancyQuotes" = quotes))
+  options("useFancyQuotes" = FALSE)
+  
   if (!is.null(rp)) {
-    options("useFancyQuotes" = FALSE)
-    measurement <- paste(base::dQuote(rp), measurement, sep = ".")
+    measurement <- paste(base::dQuote(rp), base::dQuote(measurement), sep = ".")
   }
   
   query <- paste("SELECT", field_keys, "FROM", measurement)
